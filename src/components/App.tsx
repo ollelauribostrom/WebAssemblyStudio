@@ -283,6 +283,12 @@ export class App extends React.Component<AppProps, AppState> {
       console.log("App.forceUpdate because of window resize.");
       this.forceUpdate();
     }, false);
+    window.addEventListener("beforeunload", (e: any) => {
+      // Custom message will only appear in older browsers
+      const message = "Do you want to leave WebAssembly Studio? Changes you made may not be saved";
+      e.returnValue = message;
+      return message;
+    });
   }
 
   share() {
