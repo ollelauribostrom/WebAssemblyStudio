@@ -908,6 +908,7 @@ a {
 
 .context-view.monaco-menu-container {
   max-height: 380px;
+  min-height: 100px;
   overflow: scroll;
   position: fixed;
 }
