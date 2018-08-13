@@ -4,6 +4,7 @@
 /* tslint:disable: no-empty */
 
 import "jest-enzyme";
+import waitUntil from "wait-until-promise";
 import * as React from "react";
 import { shallow } from "enzyme";
 import * as appActions from "../../../src/actions/AppActions";
@@ -26,12 +27,6 @@ import { Workspace } from "../../../src/components/Workspace";
 import { ViewType, View } from "../../../src/components/editor/View";
 import { ControlCenter } from "../../../src/components/ControlCenter";
 import { ViewTabs } from "../../../src/components/editor";
-
-function wait(duration) {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(), duration);
-  });
-}
 
 function mockFetch(returnValue) {
   (global as any).fetch = jest.fn().mockImplementation(() => Promise.resolve(returnValue));
@@ -248,7 +243,7 @@ describe("Tests for App", () => {
         expect(Service.loadJSON).toHaveBeenCalledWith("fiddle-url");
         expect(popStatus).toHaveBeenCalled();
         expect(Service.loadFilesIntoProject).toHaveBeenCalled();
-        await wait(10); // Wait for loadProject to be called
+        await waitUntil(() => loadProject.mock.calls.length > 0); // Wait util loadProject has been called
         expect(loadProject).toHaveBeenCalled();
         Service.clear();
         restore();
@@ -272,7 +267,7 @@ describe("Tests for App", () => {
           project.newFile("README.md", FileType.Markdown);
         });
         const wrapper = await setup({ fiddle: "fiddle-url" });
-        await wait(10); // Wait for openFiles to be called
+        await waitUntil(() => openFiles.mock.calls.length > 0); // Wait util openFiles has been called
         expect(openFiles).toHaveBeenCalledWith([["README.md"]]);
         Service.clear();
         restore();
@@ -329,7 +324,7 @@ describe("Tests for App", () => {
         const wrapper = setup();
         const [shortcut, callback] = bind.mock.calls[2];
         callback();
-        await wait(10); // Wait for build().then(run) Promise chain to finish
+        await waitUntil(() => run.mock.calls.length > 0); // Wait util build().then(run) Promise chain resolves
         expect(shortcut).toEqual("command+alt+enter");
         expect(build).toHaveBeenCalled();
         expect(run).toHaveBeenCalled();
@@ -343,7 +338,7 @@ describe("Tests for App", () => {
         const wrapper = setup({ embeddingParams });
         const [shortcut, callback] = bind.mock.calls[2];
         callback();
-        await wait(10); // Wait for build().then(publishArc) Promise chain to finish
+        await waitUntil(() => publishArc.mock.calls.length > 0); // Wait until build().then(publishArc) Promise chain resolves
         expect(shortcut).toEqual("command+alt+enter");
         expect(build).toHaveBeenCalled();
         expect(publishArc).toHaveBeenCalled();
@@ -583,7 +578,7 @@ describe("Tests for App", () => {
         const wrapper = setup({ embeddingParams });
         const toolbar = wrapper.find(Toolbar);
         toolbar.find(Button).at(ButtonIndex.BuildAndRun).simulate("click");
-        await wait(10); // Wait for build().then(run) Promise chain to finish
+        await waitUntil(() => run.mock.calls.length > 0); // Wait until build().then(run) Promise chain resolves
         expect(run).toHaveBeenCalled();
         expect(build).toHaveBeenCalled();
         restore();
@@ -607,7 +602,7 @@ describe("Tests for App", () => {
         const wrapper = setup({ embeddingParams });
         const toolbar = wrapper.find(Toolbar);
         toolbar.find(Button).at(ArcButtonIndex.BuildAndPreview).simulate("click");
-        await wait(10); // Wait for build().then(publishArc) Promise chain to finish
+        await waitUntil(() => publishArc.mock.calls.length > 0); // Wait until build().then(publishArc) Promise chain resolves
         expect(build).toHaveBeenCalled();
         expect(publishArc).toHaveBeenCalled();
         restore();
